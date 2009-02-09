@@ -1,53 +1,51 @@
 module Coral
   class Index < ::Hash
     attr_reader :reef, :file
-    
+
     def initialize(local_reef)
       @reef = local_reef
-      @file = "#{reef}/index.yml"
-      
-      if File.exists?(file)
-        self.replace YAML::load(File.open(file))
-      end
+      @file = Pathname(reef) + 'index.yaml'
+
+      replace YAML.load_file(file) if file.exist?
     end
-    
+
     def to_hash
-      {}.update(self)
+      {}.merge!(self)
     end
-    
+
     def find_repo(repo_name)
       key?(repo_name) and "#{repo_name}/#{self[repo_name].first}"
     end
-    
+
     def add(remote)
       (self[remote.project] ||= []) << remote.fork
       dump!
     end
-    
+
     def dump!
-      File.open(file, 'w') do |index_file|
-        index_file << YAML::dump(self.to_hash)
-      end
+      File.open(file, 'w+'){|io| io.puts(self.to_hash.to_yaml) }
     end
-    
+
     def reindex
-      Dir.chdir reef do
-        index = Dir["*/*"].inject({}) do |all, dir|
-          repo, branch = dir.split("/", 2)
-          (all[repo] ||= []) << branch
-          all
+      index = {}
+
+      reef.chdir do
+        Pathname.glob('*/*').each do |dir|
+          repo, branch = dir.split
+          (index[repo] ||= []) << branch
         end
-        self.replace index
       end
+
+      replace(index)
     end
-    
+
     def reindex!
       reindex
       dump!
     end
-    
+
     def coral_path(polyp)
-      "#{reef}/#{polyp.project}/#{polyp.fork}"
+      reef + polyp.project + polyp.fork
     end
   end
 end

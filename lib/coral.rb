@@ -1,35 +1,35 @@
 require 'yaml'
+require 'pathname'
+require 'fileutils'
 
 module Coral
-  LocalReef = "#{ENV['HOME']}/.coral"
-  
+  LocalReef = Pathname('~/.coral').expand_path
+  LocalReef.mkpath
+
   autoload :Runner, 'coral/runner'
   autoload :Polyp,  'coral/polyp'
   autoload :Index,  'coral/index'
-  
+
   def self.repos
     index.keys
   end
-  
+
   def self.index
-    @index ||= Index.new LocalReef
+    @index ||= Index.new(LocalReef)
   end
-  
+
   def self.find(repo_name)
     index.find_repo(repo_name)
   end
-  
+
   def self.activate(coral_dir)
-    coral_dir = "#{LocalReef}/#{coral_dir}" unless coral_dir.index('/') == 0
-    coral_dir += '/lib' unless coral_dir =~ %r{/lib$}
-    
-    unless File.exists? coral_dir
-      raise "Directory #{coral_dir.inspect} indexed by Coral is missing"
-    end
-    $LOAD_PATH.unshift coral_dir
+    coral_dir = LocalReef + coral_dir unless coral_dir.absolute?
+    coral_dir += 'lib' unless coral_dir.basename.to_s == 'lib'
+
+    raise("Coral misses indexed %p" % coral_dir) unless coral_dir.exist?
+
+    $LOAD_PATH.unshift(coral_dir.expand_path.to_s)
   end
 end
 
-unless 'coral' == File.basename($0)
-  require 'coral/custom_require'
-end
+require 'coral/custom_require' unless 'coral' == File.basename($0)
