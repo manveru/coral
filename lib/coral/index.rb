@@ -18,7 +18,7 @@ module Coral
     end
 
     def add(remote)
-      (self[remote.project] ||= []) << remote.fork
+      (self[remote.project] ||= []) << remote.user
       dump!
     end
 
@@ -45,7 +45,7 @@ module Coral
     end
 
     def coral_path(polyp)
-      reef + polyp.project + polyp.fork
+      reef + polyp.project + polyp.user
     end
   end
 end

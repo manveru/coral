@@ -4,20 +4,19 @@ module Coral
   # While a coral head appears to be a single organism, it is actually a head
   # of many individual, yet genetically identical, polyps.
   class Polyp
-    attr_reader :project, :fork
+    attr_reader :project, :user
 
-    def initialize(project, fork)
+    def initialize(project, user)
       @project = project
-      @fork    = fork
+      @user    = user
     end
 
     def self.parse(string)
-      if string.index("/")
-        # "project/fork" -> "project", "fork"
-        new *string.split("/", 2)
-      elsif string.index("-")
-        # "user-project" -> "project", "user"
-        new *string.split("-", 2).reverse
+      case string
+      when /^(.+)\/(.+)$/ # "project/user"
+        new(project = $1, user = $2)
+      when /^(.+)-(.+)$/ # "user-project"
+        new(project = $2, user = $1)
       else
         raise("I don't know how to parse %p" % string)
       end
