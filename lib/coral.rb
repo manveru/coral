@@ -2,6 +2,8 @@ require 'yaml'
 require 'pathname'
 require 'fileutils'
 
+$:.unshift(File.expand_path(File.dirname(__FILE__)))
+
 module Coral
   LocalReef = Pathname('~/.coral').expand_path
   LocalReef.mkpath

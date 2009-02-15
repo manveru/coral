@@ -1,7 +1,62 @@
 #!/usr/bin/env ruby
-$:.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
-require 'coral'
-require 'rubygems'
-gem 'mislav-thor', '~> 0.9.10'
 
-Coral::Runner.start
+require 'pathname'
+
+this = Pathname(__FILE__)
+this = this.readlink if this.symlink?
+require(this.dirname + '../lib/coral')
+
+require 'ostruct'
+require 'optparse'
+require 'pp'
+
+version = "Coral 2009.02.15"
+commands = %w[clone list update move reindex].sort
+command, arg = nil
+
+oppa = OptionParser.new do |o|
+  o.banner = "Usage: #{this.basename} (#{commands.join('|')}) [repo]"
+  o.define_head(version)
+
+  o.separator "\nCommands:"
+  o.on('-c', '--clone REPO',   'clone a repo into the reef'            ){|c| command, arg = :clone, c }
+  o.on('-l', '--list',         'list projects organized by Coral'      ){|l| command = :list }
+  o.on('-m', '--move REPO',    'move a local repo into the reef'       ){|m| comamnd, arg = :move, m }
+  o.on('-r', '--reindex',      'rebuild index of the reef'             ){|r| command = :reindex }
+  o.on('-u', '--update REPO',  'update a repo by pulling from upstream'){|u| command, arg = :update, u }
+
+  o.separator "\nCommand modifiers:"
+  o.on('-n', '--noop',    "don't do anything for real"){|n| Coral::Runner.noop = n }
+  o.on('-V', '--verbose', 'show debugging output'     ){|v| Coral::Runner.verbose = v }
+
+  o.separator "\nMeta info:"
+  o.on('-v', '--version', 'display version'){ puts version; exit }
+  o.on('-h', '--help',    'display help'   ){ puts o; exit }
+end
+
+ARGV.map!{|e| commands.include?(e) ? ('-' + e[0,1]) : e }
+oppa.parse!
+
+case command
+when :clone;   Coral::Runner.clone(arg)
+when :list;    Coral::Runner.list
+when :reindex; Coral::Runner.reindex
+when :update;  Coral::Runner.update(arg)
+else; puts oppa
+end
+
+__END__
+
+options
+
+    desc "clone <repo-url>", "clone a repo into a local coral reef (#{LocalReef})"
+    method_options :noop => :boolean, :verbose => true
+
+    def clone(url, name = nil)
+      polyp = name ? Polyp::parse(name) : Polyp::parse_uri(url)
+      coral_path = Coral.index.coral_path(polyp)
+      puts('git clone %p %p' % [url.to_s, coral_path.to_s])
+      cmd('git clone %p %p' % [url.to_s, coral_path.to_s])
+
+      add_remote(polyp) if command_was_success?
+    end
