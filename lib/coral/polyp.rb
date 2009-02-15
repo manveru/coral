@@ -26,7 +26,7 @@ module Coral
     def self.parse_uri(remote_uri)
       case remote_uri
       when /^git@github\.com:(.+)\/(.+)\.git$/
-      when /^github.com\/(.+)\/(.+)\.git$/
+      when /github.com\/(.+)\/(.+)\.git$/
       else
         raise("I don't know how to organize repos like %p" % remote_uri)
       end
