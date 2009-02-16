@@ -24,7 +24,12 @@ module Coral
     end
 
     def to_uri
-      URI("git://github.com/#{user}/#{project}.git")
+      case `git config github.user`.strip
+      when user
+        "git@github.com:#{user}/#{project}.git"
+      else
+        URI("git://github.com/#{user}/#{project}.git")
+      end
     end
   end
 end
