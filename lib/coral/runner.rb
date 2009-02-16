@@ -8,9 +8,7 @@ module Coral
       polyp = name ? Polyp::parse(name) : Polyp::parse_uri(url)
       coral_path = Coral.index.coral_path(polyp)
 
-      sh('git', 'clone', url, coral_path)
-
-      add_remote(polyp) if command_was_success?
+      add_remote(polyp) if sh('git', 'clone', url, coral_path)
     end
 
     def list
@@ -52,12 +50,10 @@ module Coral
       puts("Coral index written to %p" % Coral.index.file)
     end
 
-    private
-
     def sh(*args)
       args = args.map{|arg| arg.to_s }
       puts args.join(' ') if verbose
-      return system(*sh) unless noop
+      return system(*args) unless noop
       true
     end
 
