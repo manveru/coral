@@ -8,7 +8,6 @@ require(this.dirname + '../lib/coral')
 
 require 'ostruct'
 require 'optparse'
-require 'pp'
 
 version = "Coral 2009.02.15"
 commands = %w[clone list update move reindex].sort
