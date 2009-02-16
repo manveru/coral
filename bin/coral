@@ -44,19 +44,3 @@ when :reindex; Coral::Runner.reindex
 when :update;  Coral::Runner.update(arg)
 else; puts oppa
 end
-
-__END__
-
-options
-
-    desc "clone <repo-url>", "clone a repo into a local coral reef (#{LocalReef})"
-    method_options :noop => :boolean, :verbose => true
-
-    def clone(url, name = nil)
-      polyp = name ? Polyp::parse(name) : Polyp::parse_uri(url)
-      coral_path = Coral.index.coral_path(polyp)
-      puts('git clone %p %p' % [url.to_s, coral_path.to_s])
-      cmd('git clone %p %p' % [url.to_s, coral_path.to_s])
-
-      add_remote(polyp) if command_was_success?
-    end
