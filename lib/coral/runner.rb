@@ -4,11 +4,11 @@ module Coral
     module_function :noop, :noop=, :verbose, :verbose=
     module_function
 
-    def clone(url, name = nil)
-      polyp = name ? Polyp::parse(name) : Polyp::parse_uri(url)
+    def clone(arg)
+      polyp = Polyp::parse(arg)
       coral_path = Coral.index.coral_path(polyp)
 
-      add_remote(polyp) if sh('git', 'clone', url, coral_path)
+      add_remote(polyp) if sh('git', 'clone', polyp.to_uri, coral_path)
     end
 
     def list
