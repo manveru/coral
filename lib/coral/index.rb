@@ -20,7 +20,7 @@ module Coral
 
     def find_repo(repo_name)
       return unless key?(repo_name)
-      "#{repo_name}/#{self[repo_name].first}"
+      repo_name + self[repo_name].first
     end
 
     def add(remote)

@@ -21,7 +21,7 @@ module Coral
   end
 
   def self.find(repo_name)
-    index.find_repo(repo_name)
+    index.find_repo(Pathname(repo_name))
   end
 
   def self.activate(coral_dir)
